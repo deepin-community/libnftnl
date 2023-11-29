@@ -1,3 +1,79 @@
+libnftnl (1.2.6-2) unstable; urgency=medium
+
+  * [b8d5c66] d/rules: let dh manage build-flags
+  * [05d66dc] d/control, d/rules: build -doc package in `binary-indep` target
+    (Closes: #1043314)
+  * [965513d] d/control, d/rules: add `nodoc` build-profile support
+
+ -- Jeremy Sowden <jeremy@azazel.net>  Wed, 09 Aug 2023 16:09:58 +0100
+
+libnftnl (1.2.6-1) unstable; urgency=medium
+
+  [ Jeremy Sowden ]
+  * [8b89f0f] d/u/signing-key.asc: update and minmize key
+  * [e05bc06] d/control: add myself to uploaders.
+  * [790c140] d/control: bump Standards-Version to 4.6.2
+  * [649741b] d/control: set R³: no.
+  * [08096c1] d/control: use tracker.debian.org team address for `Maintainer:`
+  * [bcd604c] d/control: add b-dep on graphviz for building doc's
+  * [6937646] d/watch: use HTTPS URL
+  * [ebbe6f6] d/watch: bump to v4
+  * [998a1d8] d/libnftnl11.symbols: add `Build-Depends-Package:`
+  * [fa0046f] d/gbp.conf: DEFAULT: set `pristine-tar`
+  * [6908224] d/gbp.conf: dch: set `id-length`
+
+  [ Arturo Borrero Gonzalez ]
+  * [fe98300] New upstream version 1.2.6
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Thu, 13 Jul 2023 12:04:43 +0200
+
+libnftnl (1.2.5-1) unstable; urgency=medium
+
+  * d/watch: update tarball extension
+  * New upstream version 1.2.5
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Fri, 10 Mar 2023 12:34:05 +0100
+
+libnftnl (1.2.4-2) unstable; urgency=medium
+
+  * Rebuild and reupload of 1.2.4-1.
+  * I made a mistake uploading the previous version to the archive. The
+  original 1.2.4-1 that was uploaded was built over an not-up-to-date git tree.
+  The package was accepted into the archive before I could cancel the upload.
+  So, this rebuild and reupload should help the archive forget about the wrong
+  1.2.4-1. Sorry!
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 16 Nov 2022 10:19:20 +0100
+
+libnftnl (1.2.4-1) unstable; urgency=medium
+
+  * [c9c1293] New upstream version 1.2.4
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Tue, 15 Nov 2022 23:34:16 +0100
+
+libnftnl (1.2.3-1) unstable; urgency=medium
+
+  * [bf6ee0b] New upstream version 1.2.3
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 10 Aug 2022 13:17:04 +0200
+
+libnftnl (1.2.2-1) unstable; urgency=medium
+
+  * [5ccd111] New upstream version 1.2.2
+  * [04a8396] d/libnftnl11.symbols: refresh file
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Wed, 08 Jun 2022 00:31:12 +0200
+
+libnftnl (1.2.1-1) unstable; urgency=medium
+
+  * [b294714] New upstream version 1.2.1
+  * [eb32dfe] d/control: bump std-version to 4.6.0
+  * [5ec46cd] d/libnftnl11.symbols: refresh file
+  * [02e14b5] d/copyright: drop references to missing source files
+  * [9777cfe] d/copyright: refresh copyright date for debian/ dir
+
+ -- Arturo Borrero Gonzalez <arturo@debian.org>  Fri, 19 Nov 2021 14:52:25 +0100
+
 libnftnl (1.2.0-1) unstable; urgency=medium
 
   * Rebuild from experimental to unstable.

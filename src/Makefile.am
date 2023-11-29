@@ -34,11 +34,13 @@ libnftnl_la_SOURCES = utils.c		\
 		      expr/flow_offload.c \
 		      expr/fib.c	\
 		      expr/fwd.c	\
+		      expr/last.c	\
 		      expr/limit.c	\
 		      expr/log.c	\
 		      expr/lookup.c	\
 		      expr/dynset.c	\
 		      expr/immediate.c	\
+		      expr/inner.c	\
 		      expr/match.c	\
 		      expr/meta.c	\
 		      expr/numgen.c	\

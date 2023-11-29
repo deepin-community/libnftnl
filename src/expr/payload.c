@@ -203,32 +203,20 @@ nftnl_expr_payload_parse(struct nftnl_expr *e, struct nlattr *attr)
 	return 0;
 }
 
-static const char *base2str_array[NFT_PAYLOAD_TRANSPORT_HEADER+1] = {
+static const char *base2str_array[NFT_PAYLOAD_TUN_HEADER + 1] = {
 	[NFT_PAYLOAD_LL_HEADER]		= "link",
 	[NFT_PAYLOAD_NETWORK_HEADER] 	= "network",
 	[NFT_PAYLOAD_TRANSPORT_HEADER]	= "transport",
+	[NFT_PAYLOAD_INNER_HEADER]	= "inner",
+	[NFT_PAYLOAD_TUN_HEADER]	= "tunnel",
 };
 
 static const char *base2str(enum nft_payload_bases base)
 {
-	if (base > NFT_PAYLOAD_TRANSPORT_HEADER)
+	if (base > NFT_PAYLOAD_INNER_HEADER)
 		return "unknown";
 
 	return base2str_array[base];
-}
-
-static inline int nftnl_str2base(const char *base)
-{
-	if (strcmp(base, "link") == 0)
-		return NFT_PAYLOAD_LL_HEADER;
-	else if (strcmp(base, "network") == 0)
-		return NFT_PAYLOAD_NETWORK_HEADER;
-	else if (strcmp(base, "transport") == 0)
-		return NFT_PAYLOAD_TRANSPORT_HEADER;
-	else {
-		errno = EINVAL;
-		return -1;
-	}
 }
 
 static int
@@ -258,5 +246,5 @@ struct expr_ops expr_ops_payload = {
 	.get		= nftnl_expr_payload_get,
 	.parse		= nftnl_expr_payload_parse,
 	.build		= nftnl_expr_payload_build,
-	.snprintf	= nftnl_expr_payload_snprintf,
+	.output		= nftnl_expr_payload_snprintf,
 };

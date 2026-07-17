@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2013 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -33,13 +29,11 @@ static int nftnl_expr_reject_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_REJECT_TYPE:
-		memcpy(&reject->type, data, sizeof(reject->type));
+		memcpy(&reject->type, data, data_len);
 		break;
 	case NFTNL_EXPR_REJECT_CODE:
-		memcpy(&reject->icmp_code, data, sizeof(reject->icmp_code));
+		memcpy(&reject->icmp_code, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -126,10 +120,16 @@ nftnl_expr_reject_snprintf(char *buf, size_t len,
 			reject->type, reject->icmp_code);
 }
 
+static struct attr_policy reject_attr_policy[__NFTNL_EXPR_REJECT_MAX] = {
+	[NFTNL_EXPR_REJECT_TYPE] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_REJECT_CODE] = { .maxlen = sizeof(uint8_t) },
+};
+
 struct expr_ops expr_ops_reject = {
 	.name		= "reject",
 	.alloc_len	= sizeof(struct nftnl_expr_reject),
-	.max_attr	= NFTA_REJECT_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_REJECT_MAX - 1,
+	.attr_policy	= reject_attr_policy,
 	.set		= nftnl_expr_reject_set,
 	.get		= nftnl_expr_reject_get,
 	.parse		= nftnl_expr_reject_parse,

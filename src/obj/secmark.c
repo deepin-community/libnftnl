@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012-2016 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  */
 
 #include <stdio.h>
@@ -30,8 +26,6 @@ static int nftnl_obj_secmark_set(struct nftnl_obj *e, uint16_t type,
 	case NFTNL_OBJ_SECMARK_CTX:
 		snprintf(secmark->ctx, sizeof(secmark->ctx), "%s", (const char *)data);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -107,11 +101,16 @@ static int nftnl_obj_secmark_snprintf(char *buf, size_t len,
 	return snprintf(buf, len, "context %s ", secmark->ctx);
 }
 
+static struct attr_policy obj_secmark_attr_policy[__NFTNL_OBJ_SECMARK_MAX] = {
+	[NFTNL_OBJ_SECMARK_CTX]	= { .maxlen = NFT_SECMARK_CTX_MAXLEN },
+};
+
 struct obj_ops obj_ops_secmark = {
 	.name		= "secmark",
 	.type		= NFT_OBJECT_SECMARK,
 	.alloc_len	= sizeof(struct nftnl_obj_secmark),
-	.max_attr	= NFTA_SECMARK_MAX,
+	.nftnl_max_attr	= __NFTNL_OBJ_SECMARK_MAX - 1,
+	.attr_policy	= obj_secmark_attr_policy,
 	.set		= nftnl_obj_secmark_set,
 	.get		= nftnl_obj_secmark_get,
 	.parse		= nftnl_obj_secmark_parse,

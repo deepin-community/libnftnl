@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2018 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  */
 
 #include <stdio.h>
@@ -33,13 +29,11 @@ nftnl_expr_connlimit_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_CONNLIMIT_COUNT:
-		memcpy(&connlimit->count, data, sizeof(connlimit->count));
+		memcpy(&connlimit->count, data, data_len);
 		break;
 	case NFTNL_EXPR_CONNLIMIT_FLAGS:
-		memcpy(&connlimit->flags, data, sizeof(connlimit->flags));
+		memcpy(&connlimit->flags, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -127,10 +121,16 @@ static int nftnl_expr_connlimit_snprintf(char *buf, size_t len,
 			connlimit->count, connlimit->flags);
 }
 
+static struct attr_policy connlimit_attr_policy[__NFTNL_EXPR_CONNLIMIT_MAX] = {
+	[NFTNL_EXPR_CONNLIMIT_COUNT] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_CONNLIMIT_FLAGS] = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_connlimit = {
 	.name		= "connlimit",
 	.alloc_len	= sizeof(struct nftnl_expr_connlimit),
-	.max_attr	= NFTA_CONNLIMIT_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_CONNLIMIT_MAX - 1,
+	.attr_policy	= connlimit_attr_policy,
 	.set		= nftnl_expr_connlimit_set,
 	.get		= nftnl_expr_connlimit_get,
 	.parse		= nftnl_expr_connlimit_parse,

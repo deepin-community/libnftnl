@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * Copyright (c) 2018 Máté Eckl <ecklm94@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  */
 
 #include "internal.h"
@@ -34,16 +30,14 @@ nftnl_expr_tproxy_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_TPROXY_FAMILY:
-		memcpy(&tproxy->family, data, sizeof(tproxy->family));
+		memcpy(&tproxy->family, data, data_len);
 		break;
 	case NFTNL_EXPR_TPROXY_REG_ADDR:
-		memcpy(&tproxy->sreg_addr, data, sizeof(tproxy->sreg_addr));
+		memcpy(&tproxy->sreg_addr, data, data_len);
 		break;
 	case NFTNL_EXPR_TPROXY_REG_PORT:
-		memcpy(&tproxy->sreg_port, data, sizeof(tproxy->sreg_port));
+		memcpy(&tproxy->sreg_port, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 
 	return 0;
@@ -162,10 +156,17 @@ nftnl_expr_tproxy_snprintf(char *buf, size_t remain,
 	return offset;
 }
 
+static struct attr_policy tproxy_attr_policy[__NFTNL_EXPR_TPROXY_MAX] = {
+	[NFTNL_EXPR_TPROXY_FAMILY]   = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_TPROXY_REG_ADDR] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_TPROXY_REG_PORT] = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_tproxy = {
 	.name		= "tproxy",
 	.alloc_len	= sizeof(struct nftnl_expr_tproxy),
-	.max_attr	= NFTA_TPROXY_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_TPROXY_MAX - 1,
+	.attr_policy	= tproxy_attr_policy,
 	.set		= nftnl_expr_tproxy_set,
 	.get		= nftnl_expr_tproxy_get,
 	.parse		= nftnl_expr_tproxy_parse,

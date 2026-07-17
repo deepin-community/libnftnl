@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2019 by Stéphane Veyret <sveyret@gmail.com>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  */
 
 #include <arpa/inet.h>
@@ -21,22 +17,20 @@ static int nftnl_obj_ct_expect_set(struct nftnl_obj *e, uint16_t type,
 
 	switch (type) {
 	case NFTNL_OBJ_CT_EXPECT_L3PROTO:
-		memcpy(&exp->l3proto, data, sizeof(exp->l3proto));
+		memcpy(&exp->l3proto, data, data_len);
 		break;
 	case NFTNL_OBJ_CT_EXPECT_L4PROTO:
-		memcpy(&exp->l4proto, data, sizeof(exp->l4proto));
+		memcpy(&exp->l4proto, data, data_len);
 		break;
 	case NFTNL_OBJ_CT_EXPECT_DPORT:
-		memcpy(&exp->dport, data, sizeof(exp->dport));
+		memcpy(&exp->dport, data, data_len);
 		break;
 	case NFTNL_OBJ_CT_EXPECT_TIMEOUT:
-		memcpy(&exp->timeout, data, sizeof(exp->timeout));
+		memcpy(&exp->timeout, data, data_len);
 		break;
 	case NFTNL_OBJ_CT_EXPECT_SIZE:
-		memcpy(&exp->size, data, sizeof(exp->size));
+		memcpy(&exp->size, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -187,11 +181,21 @@ static int nftnl_obj_ct_expect_snprintf(char *buf, size_t remain,
 	return offset;
 }
 
+static struct attr_policy
+obj_ct_expect_attr_policy[__NFTNL_OBJ_CT_EXPECT_MAX] = {
+	[NFTNL_OBJ_CT_EXPECT_L3PROTO]	= { .maxlen = sizeof(uint16_t) },
+	[NFTNL_OBJ_CT_EXPECT_L4PROTO]	= { .maxlen = sizeof(uint8_t) },
+	[NFTNL_OBJ_CT_EXPECT_DPORT]	= { .maxlen = sizeof(uint16_t) },
+	[NFTNL_OBJ_CT_EXPECT_TIMEOUT]	= { .maxlen = sizeof(uint32_t) },
+	[NFTNL_OBJ_CT_EXPECT_SIZE]	= { .maxlen = sizeof(uint8_t) },
+};
+
 struct obj_ops obj_ops_ct_expect = {
 	.name		= "ct_expect",
 	.type		= NFT_OBJECT_CT_EXPECT,
 	.alloc_len	= sizeof(struct nftnl_obj_ct_expect),
-	.max_attr	= NFTA_CT_EXPECT_MAX,
+	.nftnl_max_attr	= __NFTNL_OBJ_CT_EXPECT_MAX - 1,
+	.attr_policy	= obj_ct_expect_attr_policy,
 	.set		= nftnl_obj_ct_expect_set,
 	.get		= nftnl_obj_ct_expect_get,
 	.parse		= nftnl_obj_ct_expect_parse,

@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012-2013 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -39,19 +35,17 @@ nftnl_expr_ct_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_CT_KEY:
-		memcpy(&ct->key, data, sizeof(ct->key));
+		memcpy(&ct->key, data, data_len);
 		break;
 	case NFTNL_EXPR_CT_DIR:
-		memcpy(&ct->dir, data, sizeof(ct->dir));
+		memcpy(&ct->dir, data, data_len);
 		break;
 	case NFTNL_EXPR_CT_DREG:
-		memcpy(&ct->dreg, data, sizeof(ct->dreg));
+		memcpy(&ct->dreg, data, data_len);
 		break;
 	case NFTNL_EXPR_CT_SREG:
-		memcpy(&ct->sreg, data, sizeof(ct->sreg));
+		memcpy(&ct->sreg, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -177,22 +171,10 @@ static const char *ctkey2str_array[NFT_CT_MAX + 1] = {
 
 static const char *ctkey2str(uint32_t ctkey)
 {
-	if (ctkey >= NFT_CT_MAX)
+	if (ctkey > NFT_CT_MAX)
 		return "unknown";
 
 	return ctkey2str_array[ctkey];
-}
-
-static inline int str2ctkey(const char *ctkey)
-{
-	int i;
-
-	for (i = 0; i < NFT_CT_MAX; i++) {
-		if (strcmp(ctkey2str_array[i], ctkey) == 0)
-			return i;
-	}
-
-	return -1;
 }
 
 static const char *ctdir2str(uint8_t ctdir)
@@ -205,21 +187,6 @@ static const char *ctdir2str(uint8_t ctdir)
 	default:
 		return "unknown";
 	}
-}
-
-static inline int str2ctdir(const char *str, uint8_t *ctdir)
-{
-	if (strcmp(str, "original") == 0) {
-		*ctdir = IP_CT_DIR_ORIGINAL;
-		return 0;
-	}
-
-	if (strcmp(str, "reply") == 0) {
-		*ctdir = IP_CT_DIR_REPLY;
-		return 0;
-	}
-
-	return -1;
 }
 
 static int
@@ -250,10 +217,18 @@ nftnl_expr_ct_snprintf(char *buf, size_t remain,
 	return offset;
 }
 
+static struct attr_policy ct_attr_policy[__NFTNL_EXPR_CT_MAX] = {
+	[NFTNL_EXPR_CT_DREG] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_CT_KEY]  = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_CT_DIR]  = { .maxlen = sizeof(uint8_t) },
+	[NFTNL_EXPR_CT_SREG] = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_ct = {
 	.name		= "ct",
 	.alloc_len	= sizeof(struct nftnl_expr_ct),
-	.max_attr	= NFTA_CT_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_CT_MAX - 1,
+	.attr_policy	= ct_attr_policy,
 	.set		= nftnl_expr_ct_set,
 	.get		= nftnl_expr_ct_get,
 	.parse		= nftnl_expr_ct_parse,

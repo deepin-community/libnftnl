@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -206,14 +202,16 @@ int nftnl_parse_data(union nftnl_data_reg *data, struct nlattr *attr, int *type)
 	return ret;
 }
 
-void nftnl_free_verdict(const union nftnl_data_reg *data)
+int nftnl_data_cpy(union nftnl_data_reg *dreg, const void *src, uint32_t len)
 {
-	switch(data->verdict) {
-	case NFT_JUMP:
-	case NFT_GOTO:
-		xfree(data->chain);
-		break;
-	default:
-		break;
+	int ret = 0;
+
+	if (len > sizeof(dreg->val)) {
+		len = sizeof(dreg->val);
+		ret = -1;
 	}
+
+	memcpy(dreg->val, src, len);
+	dreg->len = len;
+	return ret;
 }

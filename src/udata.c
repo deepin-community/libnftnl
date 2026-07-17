@@ -1,11 +1,7 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012-2016 by Pablo Neira Ayuso <pablo@netfilter.org>
  * (C) 2016 by Carlos Falgueras García <carlosfg@riseup.net>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  */
 
 #include <libnftnl/udata.h>
@@ -42,6 +38,11 @@ uint32_t nftnl_udata_buf_len(const struct nftnl_udata_buf *buf)
 	return (uint32_t)(buf->end - buf->data);
 }
 
+static uint32_t nftnl_udata_buf_space(const struct nftnl_udata_buf *buf)
+{
+	return buf->size - nftnl_udata_buf_len(buf);
+}
+
 EXPORT_SYMBOL(nftnl_udata_buf_data);
 void *nftnl_udata_buf_data(const struct nftnl_udata_buf *buf)
 {
@@ -74,7 +75,8 @@ bool nftnl_udata_put(struct nftnl_udata_buf *buf, uint8_t type, uint32_t len,
 {
 	struct nftnl_udata *attr;
 
-	if (len > UINT8_MAX || buf->size < len + sizeof(struct nftnl_udata))
+	if (len > UINT8_MAX ||
+	    nftnl_udata_buf_space(buf) < len + sizeof(struct nftnl_udata))
 		return false;
 
 	attr = (struct nftnl_udata *)buf->end;

@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -39,16 +35,14 @@ nftnl_expr_meta_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_META_KEY:
-		memcpy(&meta->key, data, sizeof(meta->key));
+		memcpy(&meta->key, data, data_len);
 		break;
 	case NFTNL_EXPR_META_DREG:
-		memcpy(&meta->dreg, data, sizeof(meta->dreg));
+		memcpy(&meta->dreg, data, data_len);
 		break;
 	case NFTNL_EXPR_META_SREG:
-		memcpy(&meta->sreg, data, sizeof(meta->sreg));
+		memcpy(&meta->sreg, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -179,19 +173,6 @@ static const char *meta_key2str(uint8_t key)
 	return "unknown";
 }
 
-static inline int str2meta_key(const char *str)
-{
-	int i;
-
-	for (i = 0; i < NFT_META_MAX; i++) {
-		if (strcmp(str, meta_key2str_array[i]) == 0)
-			return i;
-	}
-
-	errno = EINVAL;
-	return -1;
-}
-
 static int
 nftnl_expr_meta_snprintf(char *buf, size_t len,
 			 uint32_t flags, const struct nftnl_expr *e)
@@ -209,10 +190,17 @@ nftnl_expr_meta_snprintf(char *buf, size_t len,
 	return 0;
 }
 
+static struct attr_policy meta_attr_policy[__NFTNL_EXPR_META_MAX] = {
+	[NFTNL_EXPR_META_KEY]  = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_META_DREG] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_META_SREG] = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_meta = {
 	.name		= "meta",
 	.alloc_len	= sizeof(struct nftnl_expr_meta),
-	.max_attr	= NFTA_META_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_META_MAX - 1,
+	.attr_policy	= meta_attr_policy,
 	.set		= nftnl_expr_meta_set,
 	.get		= nftnl_expr_meta_get,
 	.parse		= nftnl_expr_meta_parse,

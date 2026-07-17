@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012-2013 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -46,28 +42,26 @@ nftnl_expr_exthdr_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_EXTHDR_DREG:
-		memcpy(&exthdr->dreg, data, sizeof(exthdr->dreg));
+		memcpy(&exthdr->dreg, data, data_len);
 		break;
 	case NFTNL_EXPR_EXTHDR_TYPE:
-		memcpy(&exthdr->type, data, sizeof(exthdr->type));
+		memcpy(&exthdr->type, data, data_len);
 		break;
 	case NFTNL_EXPR_EXTHDR_OFFSET:
-		memcpy(&exthdr->offset, data, sizeof(exthdr->offset));
+		memcpy(&exthdr->offset, data, data_len);
 		break;
 	case NFTNL_EXPR_EXTHDR_LEN:
-		memcpy(&exthdr->len, data, sizeof(exthdr->len));
+		memcpy(&exthdr->len, data, data_len);
 		break;
 	case NFTNL_EXPR_EXTHDR_OP:
-		memcpy(&exthdr->op, data, sizeof(exthdr->op));
+		memcpy(&exthdr->op, data, data_len);
 		break;
 	case NFTNL_EXPR_EXTHDR_FLAGS:
-		memcpy(&exthdr->flags, data, sizeof(exthdr->flags));
+		memcpy(&exthdr->flags, data, data_len);
 		break;
 	case NFTNL_EXPR_EXTHDR_SREG:
-		memcpy(&exthdr->sreg, data, sizeof(exthdr->sreg));
+		memcpy(&exthdr->sreg, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -208,33 +202,6 @@ static const char *op2str(uint8_t op)
 	}
 }
 
-static inline int str2exthdr_op(const char* str)
-{
-	if (!strcmp(str, "tcpopt"))
-		return NFT_EXTHDR_OP_TCPOPT;
-	if (!strcmp(str, "ipv4"))
-		return NFT_EXTHDR_OP_IPV4;
-
-	/* if str == "ipv6" or anything else */
-	return NFT_EXTHDR_OP_IPV6;
-}
-
-static inline int str2exthdr_type(const char *str)
-{
-	if (strcmp(str, "hopopts") == 0)
-		return IPPROTO_HOPOPTS;
-	else if (strcmp(str, "routing") == 0)
-		return IPPROTO_ROUTING;
-	else if (strcmp(str, "fragment") == 0)
-		return IPPROTO_FRAGMENT;
-	else if (strcmp(str, "dstopts") == 0)
-		return IPPROTO_DSTOPTS;
-	else if (strcmp(str, "mh") == 0)
-		return IPPROTO_MH;
-
-	return -1;
-}
-
 static int
 nftnl_expr_exthdr_snprintf(char *buf, size_t len,
 			   uint32_t flags, const struct nftnl_expr *e)
@@ -259,10 +226,21 @@ nftnl_expr_exthdr_snprintf(char *buf, size_t len,
 
 }
 
+static struct attr_policy exthdr_attr_policy[__NFTNL_EXPR_EXTHDR_MAX] = {
+	[NFTNL_EXPR_EXTHDR_DREG]   = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_EXTHDR_TYPE]   = { .maxlen = sizeof(uint8_t) },
+	[NFTNL_EXPR_EXTHDR_OFFSET] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_EXTHDR_LEN]    = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_EXTHDR_FLAGS]  = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_EXTHDR_OP]     = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_EXTHDR_SREG]   = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_exthdr = {
 	.name		= "exthdr",
 	.alloc_len	= sizeof(struct nftnl_expr_exthdr),
-	.max_attr	= NFTA_EXTHDR_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_EXTHDR_MAX - 1,
+	.attr_policy	= exthdr_attr_policy,
 	.set		= nftnl_expr_exthdr_set,
 	.get		= nftnl_expr_exthdr_get,
 	.parse		= nftnl_expr_exthdr_parse,

@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -46,7 +42,7 @@ nftnl_expr_target_set(struct nftnl_expr *e, uint16_t type,
 			 (const char *) data);
 		break;
 	case NFTNL_EXPR_TG_REV:
-		memcpy(&tg->rev, data, sizeof(tg->rev));
+		memcpy(&tg->rev, data, data_len);
 		break;
 	case NFTNL_EXPR_TG_INFO:
 		if (e->flags & (1 << NFTNL_EXPR_TG_INFO))
@@ -55,8 +51,6 @@ nftnl_expr_target_set(struct nftnl_expr *e, uint16_t type,
 		tg->data = data;
 		tg->data_len = data_len;
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -180,10 +174,17 @@ static void nftnl_expr_target_free(const struct nftnl_expr *e)
 	xfree(target->data);
 }
 
+static struct attr_policy target_attr_policy[__NFTNL_EXPR_TG_MAX] = {
+	[NFTNL_EXPR_TG_NAME] = { .maxlen = XT_EXTENSION_MAXNAMELEN },
+	[NFTNL_EXPR_TG_REV]  = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_TG_INFO] = { .maxlen = 0 },
+};
+
 struct expr_ops expr_ops_target = {
 	.name		= "target",
 	.alloc_len	= sizeof(struct nftnl_expr_target),
-	.max_attr	= NFTA_TARGET_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_TG_MAX - 1,
+	.attr_policy	= target_attr_policy,
 	.free		= nftnl_expr_target_free,
 	.set		= nftnl_expr_target_set,
 	.get		= nftnl_expr_target_get,

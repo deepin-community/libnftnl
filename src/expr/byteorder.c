@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012-2013 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -37,22 +33,20 @@ nftnl_expr_byteorder_set(struct nftnl_expr *e, uint16_t type,
 
 	switch(type) {
 	case NFTNL_EXPR_BYTEORDER_SREG:
-		memcpy(&byteorder->sreg, data, sizeof(byteorder->sreg));
+		memcpy(&byteorder->sreg, data, data_len);
 		break;
 	case NFTNL_EXPR_BYTEORDER_DREG:
-		memcpy(&byteorder->dreg, data, sizeof(byteorder->dreg));
+		memcpy(&byteorder->dreg, data, data_len);
 		break;
 	case NFTNL_EXPR_BYTEORDER_OP:
-		memcpy(&byteorder->op, data, sizeof(byteorder->op));
+		memcpy(&byteorder->op, data, data_len);
 		break;
 	case NFTNL_EXPR_BYTEORDER_LEN:
-		memcpy(&byteorder->len, data, sizeof(byteorder->len));
+		memcpy(&byteorder->len, data, data_len);
 		break;
 	case NFTNL_EXPR_BYTEORDER_SIZE:
-		memcpy(&byteorder->size, data, sizeof(byteorder->size));
+		memcpy(&byteorder->size, data, data_len);
 		break;
-	default:
-		return -1;
 	}
 	return 0;
 }
@@ -185,18 +179,6 @@ static const char *bo2str(uint32_t type)
 	return expr_byteorder_str[type];
 }
 
-static inline int nftnl_str2ntoh(const char *op)
-{
-	if (strcmp(op, "ntoh") == 0)
-		return NFT_BYTEORDER_NTOH;
-	else if (strcmp(op, "hton") == 0)
-		return NFT_BYTEORDER_HTON;
-	else {
-		errno = EINVAL;
-		return -1;
-	}
-}
-
 static int
 nftnl_expr_byteorder_snprintf(char *buf, size_t remain,
 			      uint32_t flags, const struct nftnl_expr *e)
@@ -212,10 +194,19 @@ nftnl_expr_byteorder_snprintf(char *buf, size_t remain,
 	return offset;
 }
 
+static struct attr_policy byteorder_attr_policy[__NFTNL_EXPR_BYTEORDER_MAX] = {
+	[NFTNL_EXPR_BYTEORDER_DREG] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_BYTEORDER_SREG] = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_BYTEORDER_OP]   = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_BYTEORDER_LEN]  = { .maxlen = sizeof(uint32_t) },
+	[NFTNL_EXPR_BYTEORDER_SIZE] = { .maxlen = sizeof(uint32_t) },
+};
+
 struct expr_ops expr_ops_byteorder = {
 	.name		= "byteorder",
 	.alloc_len	= sizeof(struct nftnl_expr_byteorder),
-	.max_attr	= NFTA_BYTEORDER_MAX,
+	.nftnl_max_attr	= __NFTNL_EXPR_BYTEORDER_MAX - 1,
+	.attr_policy	= byteorder_attr_policy,
 	.set		= nftnl_expr_byteorder_set,
 	.get		= nftnl_expr_byteorder_get,
 	.parse		= nftnl_expr_byteorder_parse,

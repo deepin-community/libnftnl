@@ -1,10 +1,6 @@
+/* SPDX-License-Identifier: GPL-2.0-or-later */
 /*
  * (C) 2012 by Pablo Neira Ayuso <pablo@netfilter.org>
- *
- * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published
- * by the Free Software Foundation; either version 2 of the License, or
- * (at your option) any later version.
  *
  * This code has been sponsored by Sophos Astaro <http://www.sophos.com>
  */
@@ -71,6 +67,16 @@ int nftnl_expr_set(struct nftnl_expr *expr, uint16_t type,
 	case NFTNL_EXPR_NAME:	/* cannot be modified */
 		return 0;
 	default:
+		if (type < NFTNL_EXPR_BASE || type > expr->ops->nftnl_max_attr)
+			return -1;
+
+		if (!expr->ops->attr_policy)
+			return -1;
+
+		if (expr->ops->attr_policy[type].maxlen &&
+		    expr->ops->attr_policy[type].maxlen < data_len)
+			return -1;
+
 		if (expr->ops->set(expr, type, data, data_len) < 0)
 			return -1;
 	}

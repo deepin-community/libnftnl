@@ -1,3 +1,9 @@
+libnftnl (1.2.9-1deepin1) unstable; urgency=medium
+
+  * Rebuild with LTO enabled (dpkg vendor feature optimize/lto).
+
+ -- tunaichao <tunaichao@uniontech.com>  Mon, 21 Sep 2026 15:28:05 +0800
+
 libnftnl (1.2.9-1) unstable; urgency=medium
 
   * [96c882b] d/upstream/signing-key.asc: refresh key
